@@ -66,5 +66,14 @@
     </div>
 
 </body>
-
+<script src="./js/jquery-1.12.4.min.js"></script>
+<script>
+    $(function(){
+        $('#exampleInputFile').change(function(){
+            var tu = this.files[0];
+            var url = URL.createObjectURL(tu);
+            $('.user_pic').attr('src',url);
+        })
+    })
+</script>
 </html>
