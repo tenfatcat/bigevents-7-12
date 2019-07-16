@@ -73,7 +73,8 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal">新增分类</a>
+                            <a href="#" class="btn btn-success btn-add" data-toggle="modal"
+                                data-target="#addModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
@@ -90,6 +91,7 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <input type="hidden" name="id" class="id">
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
                             <input type="text" class="form-control first" id="recipient-name">
@@ -115,18 +117,12 @@
         });
 
         $('#model_shutoff').click(function () {
-            alert('shutoff');
             $('#addModal').modal('hide');
         });
 
 
 
-        $('.category_table').delegate('a', 'click', function () {
-            if ($(this).hasClass('btn-info')) {
-                $('#addModal .modal-title').html('修改分类名称');
-                $('#addModal').modal('show');
-            }
-        })      
+
     </script>
     <script type="text/html" id="tmp">
         {{each data v}}
@@ -134,8 +130,7 @@
             <td>{{v.name}}</td>
             <td>{{v.slug}}</td>
             <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;4&quot;,&quot;slug&quot;:&quot;travel&quot;,&quot;name&quot;:&quot;爱旅行&quot;});"
-                    class="btn btn-info btn-xs">编辑</a>
+                <a href="#" data-id="{{v.id}}" class="btn btn-info btn-xs btn-edit">编辑</a>
                 <a href="#" data-id="{{v.id}}" class="btn btn-del btn-danger btn-xs">删除</a>
             </td>
         </tr>
@@ -156,41 +151,84 @@
                 })
             }
             getdata();
+            // 模态框里的按钮点击事件
             $('#model_add').click(function () {
-                var new_name = $('.first').val().trim();
-                var new_nname = $('.second').val().trim();
-                $.ajax({
-                    type: "post",
-                    url: "http://localhost:8000/admin/category_add",
-                    data: {
-                        name: new_name,
-                        slug: new_nname
-                    },
-                    success: function (qwe) {
-                        if (qwe.code == 200) {
-                            getdata();
+                // 因为新增和修改是一个按钮,所以要判断是新增还是修改
+                // 通过是否有 btn-success 来判断
+                if ($(this).hasClass('btn-success')) {
+                    var name = $('.first').val();
+                    var slug = $('.second').val();
+                    var id = $('.id').val();
+                    $.post({
+                        url:"http://localhost:8000/admin/category_edit",
+                        data:{
+                            id:id,
+                            name:name,
+                            slug:slug
+                        },
+                        success:function(qwe){
+                            if(qwe.code == 200){
+                                alert('修改成功')
+                                getdata();
+                            }
                         }
-                    }
-                })
+                    })
+                } else {
+                    var new_name = $('.first').val().trim();
+                    var new_nname = $('.second').val().trim();
+                    $.ajax({
+                        type: "post",
+                        url: "http://localhost:8000/admin/category_add",
+                        data: {
+                            name: new_name,
+                            slug: new_nname
+                        },
+                        success: function (qwe) {
+                            if (qwe.code == 200) {
+                                getdata();
+                            }
+                        }
+                    })
+                }
+
                 $('#addModal').modal('hide');
             });
-           $('tbody').on('click','.btn-del',function(e){
-               e.preventDefault();
-               if(confirm('确定删除?')){
-                   var that = $(this);
-                   var cateid = $(this).attr('data-id');
-                   $.ajax({
-                       type:"post",
-                       url:"http://localhost:8000/admin/category_delete",
-                       data:{id:cateid},
-                       success:function(qwe){
-                           if(qwe.code==200){
-                               that.parents('tr').remove();
-                           }
-                       }
-                   })
-               }
-           })
+            // 删除事件
+            $('tbody').on('click', '.btn-del', function (e) {
+                e.preventDefault();
+                if (confirm('确定删除?')) {
+                    var that = $(this);
+                    var cateid = $(this).attr('data-id');
+                    $.ajax({
+                        type: "post",
+                        url: "http://localhost:8000/admin/category_delete",
+                        data: { id: cateid },
+                        success: function (qwe) {
+                            if (qwe.code == 200) {
+                                that.parents('tr').remove();
+                            }
+                        }
+                    })
+                }
+            })
+            // 修改分类的模态框还原
+            $('.btn-add').click(function () {
+                $('#addModal .modal-title').html('新增分类');
+                $('#model_add').text('新增').removeClass('btn-success');
+            })
+            // 修改分类
+            $('tbody').on('click', '.btn-edit', function () {
+                $('#addModal .modal-title').html('修改分类');
+                $('#addModal').modal('show');
+                $('#model_add').text('修改').addClass('btn-success');
+
+                var id = $(this).attr('data-id')
+                var slug = $(this).parent().prev().text();
+                var name = $(this).parent().prev().prev().text();
+                $('.first').val(name);
+                $('.second').val(slug);
+                $('.id').val(id);
+            })
         })
     </script>
 </body>
