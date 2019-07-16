@@ -214,7 +214,8 @@
                 $('#model_add').text('新增').removeClass('btn-success');
             })
             // 修改分类
-            $('tbody').on('click', '.btn-edit', function () {
+            $('tbody').on('click', '.btn-edit', function (e) {
+                e.preventDefault();
                 $('#addModal .modal-title').html('修改分类');
                 $('#addModal').modal('show');
                 $('#model_add').text('修改').addClass('btn-success');
