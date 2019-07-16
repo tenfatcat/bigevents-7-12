@@ -136,36 +136,31 @@
             <td class="text-center">
                 <a href="javascript:editTr({&quot;id&quot;:&quot;4&quot;,&quot;slug&quot;:&quot;travel&quot;,&quot;name&quot;:&quot;爱旅行&quot;});"
                     class="btn btn-info btn-xs">编辑</a>
-                <a href="javascript:deleteTr( {{v.id}} );" class="btn btn-danger btn-xs">删除</a>
+                <a href="#" data-id="{{v.id}}" class="btn btn-del btn-danger btn-xs">删除</a>
             </td>
         </tr>
         {{/each}}
     </script>
-    <script type="text/html" id="tmp2">
-        <tr>
-            <td>{{name}}</td>
-            <td>{{slug}}</td>
-            <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;4&quot;,&quot;slug&quot;:&quot;travel&quot;,&quot;name&quot;:&quot;爱旅行&quot;});"
-                    class="btn btn-info btn-xs">编辑</a>
-                <a href="javascript:deleteTr( {{1}} );" class="btn btn-danger btn-xs">删除</a>
-            </td>
-        </tr>
-    </script>
+
     <script>
         $(function () {
-            $.ajax({
-                url: "http://localhost:8000/admin/category_search",
-                success: function (qwe) {
-                    var ntr = template('tmp', qwe);
-                    $('tbody').html(ntr);
-                }
-            })
+            function getdata() {
+                $.ajax({
+                    url: "http://localhost:8000/admin/category_search",
+                    success: function (qwe) {
+                        if (qwe.code == 200) {
+                            var ntr = template('tmp', qwe);
+                            $('tbody').html(ntr);
+                        }
+                    }
+                })
+            }
+            getdata();
             $('#model_add').click(function () {
                 var new_name = $('.first').val().trim();
                 var new_nname = $('.second').val().trim();
                 $.ajax({
-                    type: "poet",
+                    type: "post",
                     url: "http://localhost:8000/admin/category_add",
                     data: {
                         name: new_name,
@@ -173,17 +168,29 @@
                     },
                     success: function (qwe) {
                         if (qwe.code == 200) {
-                            var fm = {
-                                name: new_name,
-                                slug: new_nname
-                            }
-                            var nntr = template('tmp2', fm);
-                            $('tbody').append(nntr);
+                            getdata();
                         }
                     }
                 })
                 $('#addModal').modal('hide');
             });
+           $('tbody').on('click','.btn-del',function(e){
+               e.preventDefault();
+               if(confirm('确定删除?')){
+                   var that = $(this);
+                   var cateid = $(this).attr('data-id');
+                   $.ajax({
+                       type:"post",
+                       url:"http://localhost:8000/admin/category_delete",
+                       data:{id:cateid},
+                       success:function(qwe){
+                           if(qwe.code==200){
+                               that.parents('tr').remove();
+                           }
+                       }
+                   })
+               }
+           })
         })
     </script>
 </body>
