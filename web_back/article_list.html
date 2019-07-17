@@ -24,7 +24,7 @@
                 <div class="col-xs-6">
                     <form class="form-inline">
                         <select id="selCategory" name="" class="form-control input-sm">
-                            <option>所有分类</option>
+                            <option value="">所有分类</option>
                             <option>未分类</option>
                             <option>奇趣事</option>
                             <option>会生活</option>
@@ -291,35 +291,41 @@
     </script>
     <script>
         // 设置左侧菜单
-        $('#release_btn').click(function () {
-            window.parent.setMenu(1, 1);
-        })
-        $.ajax({
-            url: "http://localhost:8000/admin/category_search",
-            success: function (qwe) {
-                if (qwe.code == 200) {
-                    var nop = template('tml', qwe);
-                    $('#selCategory').html(nop);
-                }
-            }
-        })
-        $('#btnSearch').click(function (e) {
-            e.preventDefault();
-            var allone = $('#selCategory').val();
-            var alltwo = $('#selStatus').val();
+        $(function () {
+            $('#release_btn').click(function () {
+                window.parent.setMenu(1, 1);
+            })
             $.ajax({
-                url: "http://localhost:8000/admin/search",
-                data: {
-                    type: allone,
-                    state: alltwo,
-                    page: 1,
-                    perpage: 5
-                },
+                url: "http://localhost:8000/admin/category_search",
                 success: function (qwe) {
-                    var ntr = template('tml2',qwe);
-                    $('tbody').html(ntr);
+                    if (qwe.code == 200) {
+                        var nop = template('tml', qwe);
+                        $('#selCategory').html(nop);
+                    }
                 }
             })
+            function getpage(page) {
+                var allone = $('#selCategory').val();
+                var alltwo = $('#selStatus').val();
+                $.ajax({
+                    url: "http://localhost:8000/admin/search",
+                    data: {
+                        type: allone,
+                        state: alltwo,
+                        page: 1,
+                        perpage: 5
+                    },
+                    success: function (qwe) {
+                        var ntr = template('tml2', qwe);
+                        $('tbody').html(ntr);
+                    }
+                })
+            }
+            $('#btnSearch').click(function (e) {
+                e.preventDefault();
+                getpage(1);
+            })
+            $('#btnSearch').trigger('click');
         })
     </script>
 
