@@ -31,9 +31,9 @@
                             <option>爱旅行</option>
                         </select>
                         <select id="selStatus" name="" class="form-control input-sm">
-                            <option>所有状态</option>
-                            <option value="drafted">草稿</option>
-                            <option value="published">已发布</option>
+                            <option value="">所有状态</option>
+                            <option>草稿</option>
+                            <option>已发布</option>
                         </select>
                         <button id="btnSearch" class="btn btn-default btn-sm">筛选</button>
                     </form>
@@ -274,6 +274,21 @@
             <option value="{{v.id}}">{{v.name}}</option>
         {{/each}}
     </script>
+    <script type="text/html" id="tml2">
+        {{each data v}}
+        <tr>
+            <td>{{v.title}}</td>
+            <td>{{v.author}}</td>
+            <td>{{v.type}}</td>
+            <td class="text-center">{{v.date}}</td>
+            <td class="text-center">{{v.state}}</td>
+            <td class="text-center">
+                <a href="post-edit.html?id=995" class="btn btn-default btn-xs">编辑</a>
+                <a href="#" data-id="{{v.id}}" class="btn btn-danger btn-xs">删除</a>
+            </td>
+        </tr>
+        {{/each}}
+    </script>
     <script>
         // 设置左侧菜单
         $('#release_btn').click(function () {
@@ -287,6 +302,24 @@
                     $('#selCategory').html(nop);
                 }
             }
+        })
+        $('#btnSearch').click(function (e) {
+            e.preventDefault();
+            var allone = $('#selCategory').val();
+            var alltwo = $('#selStatus').val();
+            $.ajax({
+                url: "http://localhost:8000/admin/search",
+                data: {
+                    type: allone,
+                    state: alltwo,
+                    page: 1,
+                    perpage: 5
+                },
+                success: function (qwe) {
+                    var ntr = template('tml2',qwe);
+                    $('tbody').html(ntr);
+                }
+            })
         })
     </script>
 
